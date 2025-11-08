@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan to Bill - Team Manager Testing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .auth-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .response-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .response-box pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .success {
+            color: #28a745;
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .list-item {
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .list-item strong {
+            color: #667eea;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-buttons button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Plan to Bill - Team Manager Testing UI</h1>
+            <p>Test backend API functionality for team managers</p>
+        </div>
+
+        <!-- Authentication Section -->
+        <div class="auth-section">
+            <h2>🔐 Authentication</h2>
+            <div id="loginForm">
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="loginEmail" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password">
+                </div>
+                <button class="btn" onclick="login()">Login</button>
+                <button class="btn btn-warning" onclick="showRegisterForm()">Register New User</button>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <h3>Register New User</h3>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="regEmail" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="regPassword" placeholder="Enter password">
+                </div>
+                <div class="form-group">
+                    <label>First Name:</label>
+                    <input type="text" id="regFirstName" placeholder="First name">
+                </div>
+                <div class="form-group">
+                    <label>Last Name:</label>
+                    <input type="text" id="regLastName" placeholder="Last name">
+                </div>
+                <div class="form-group">
+                    <label>Company Name:</label>
+                    <input type="text" id="regCompany" placeholder="Company name">
+                </div>
+                <div class="form-group">
+                    <label>Role:</label>
+                    <select id="regRole">
+                        <option value="admin">Admin</option>
+                        <option value="project_manager">Project Manager</option>
+                        <option value="team_member">Team Member</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="register()">Register</button>
+                <button class="btn btn-warning" onclick="showLoginForm()">Back to Login</button>
+            </div>
+
+            <div id="verifyOtpForm" class="hidden">
+                <h3>✉️ Verify Email</h3>
+                <p style="color: #28a745; margin-bottom: 20px;">
+                    📧 We've sent a 6-digit OTP to your email. Please check your inbox and enter it below.
+                </p>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="verifyEmail" placeholder="Enter your email" readonly>
+                </div>
+                <div class="form-group">
+                    <label>OTP Code:</label>
+                    <input type="text" id="otpCode" placeholder="Enter 6-digit OTP" maxlength="6">
+                </div>
+                <button class="btn btn-success" onclick="verifyEmail()">Verify Email</button>
+                <button class="btn btn-warning" onclick="showLoginForm()">Back to Login</button>
+            </div>
+
+            <div id="userInfo" class="hidden">
+                <div class="user-info">
+                    <div>
+                        <strong>Logged in as:</strong> <span id="userName"></span> (<span id="userRole"></span>)
+                    </div>
+                    <button class="btn btn-danger" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            <div id="authResponse" class="response-box hidden"></div>
+        </div>
+
+        <!-- Main Content (hidden until logged in) -->
+        <div id="mainContent" class="hidden">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('projects')">Projects</button>
+                <button class="tab-btn" onclick="showTab('tasks')">Tasks</button>
+                <button class="tab-btn" onclick="showTab('expenses')">Expenses</button>
+                <button class="tab-btn" onclick="showTab('invoices')">Invoices</button>
+            </div>
+
+            <!-- Projects Tab -->
+            <div id="projectsTab" class="tab-content active">
+                <h2>📁 Projects</h2>
+                <div class="form-group">
+                    <label>Project Name:</label>
+                    <input type="text" id="projectName" placeholder="Project name">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="projectDesc" placeholder="Project description"></textarea>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Budget:</label>
+                        <input type="number" id="projectBudget" placeholder="Budget">
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select id="projectStatus">
+                            <option value="active">Active</option>
+                            <option value="on_hold">On Hold</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Start Date:</label>
+                        <input type="date" id="projectStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date:</label>
+                        <input type="date" id="projectEndDate">
+                    </div>
+                </div>
+                <button class="btn" onclick="createProject()">Create Project</button>
+                <button class="btn btn-success" onclick="getProjects()">Get All Projects</button>
+                <div id="projectResponse" class="response-box hidden"></div>
+            </div>
+
+            <!-- Tasks Tab -->
+            <div id="tasksTab" class="tab-content">
+                <h2>✅ Tasks</h2>
+                <div class="form-group">
+                    <label>Task Title:</label>
+                    <input type="text" id="taskTitle" placeholder="Task title">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="taskDesc" placeholder="Task description"></textarea>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Project ID:</label>
+                        <input type="number" id="taskProjectId" placeholder="Project ID">
+                    </div>
+                    <div class="form-group">
+                        <label>Assigned To (User ID):</label>
+                        <input type="number" id="taskAssignedTo" placeholder="User ID">
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Priority:</label>
+                        <select id="taskPriority">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select id="taskStatus">
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Due Date:</label>
+                    <input type="date" id="taskDueDate">
+                </div>
+                <button class="btn" onclick="createTask()">Create Task</button>
+                <button class="btn btn-success" onclick="getTasks()">Get All Tasks</button>
+                <div id="taskResponse" class="response-box hidden"></div>
+            </div>
+
+            <!-- Expenses Tab -->
+            <div id="expensesTab" class="tab-content">
+                <h2>💰 Expenses</h2>
+                <div class="form-group">
+                    <label>Expense Title:</label>
+                    <input type="text" id="expenseTitle" placeholder="Expense title">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="expenseDesc" placeholder="Expense description"></textarea>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <input type="number" id="expenseAmount" placeholder="Amount" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Category:</label>
+                        <input type="text" id="expenseCategory" placeholder="Category">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Project ID:</label>
+                    <input type="number" id="expenseProjectId" placeholder="Project ID">
+                </div>
+                <button class="btn" onclick="createExpense()">Submit Expense</button>
+                <button class="btn btn-success" onclick="getExpenses()">Get All Expenses</button>
+                <div style="margin-top: 20px;">
+                    <h3>Approve/Reject Expense</h3>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label>Expense ID:</label>
+                            <input type="number" id="reviewExpenseId" placeholder="Expense ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Action:</label>
+                            <select id="reviewAction">
+                                <option value="approved">Approve</option>
+                                <option value="rejected">Reject</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-warning" onclick="reviewExpense()">Review Expense</button>
+                </div>
+                <div id="expenseResponse" class="response-box hidden"></div>
+            </div>
+
+            <!-- Invoices Tab -->
+            <div id="invoicesTab" class="tab-content">
+                <h2>📄 Invoices</h2>
+                <div class="form-group">
+                    <label>Client Name:</label>
+                    <input type="text" id="invoiceClientName" placeholder="Client name">
+                </div>
+                <div class="form-group">
+                    <label>Client Email:</label>
+                    <input type="email" id="invoiceClientEmail" placeholder="Client email">
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Project ID:</label>
+                        <input type="number" id="invoiceProjectId" placeholder="Project ID">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <input type="number" id="invoiceAmount" placeholder="Amount" step="0.01">
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Tax Amount:</label>
+                        <input type="number" id="invoiceTax" placeholder="Tax amount" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Issue Date:</label>
+                        <input type="date" id="invoiceIssueDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Due Date:</label>
+                    <input type="date" id="invoiceDueDate">
+                </div>
+                <div class="form-group">
+                    <label>Notes:</label>
+                    <textarea id="invoiceNotes" placeholder="Invoice notes"></textarea>
+                </div>
+                <button class="btn" onclick="createInvoice()">Create Invoice</button>
+                <button class="btn btn-success" onclick="getInvoices()">Get All Invoices</button>
+                <div style="margin-top: 20px;">
+                    <h3>Invoice Actions</h3>
+                    <div class="form-group">
+                        <label>Invoice ID:</label>
+                        <input type="number" id="invoiceActionId" placeholder="Invoice ID">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-warning" onclick="sendInvoice()">Send Invoice</button>
+                        <button class="btn btn-success" onclick="markInvoicePaid()">Mark as Paid</button>
+                    </div>
+                </div>
+                <div id="invoiceResponse" class="response-box hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
