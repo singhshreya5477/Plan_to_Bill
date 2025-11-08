@@ -6,6 +6,10 @@ const cors = require('cors');
 const authRoutes = require('./src/routes/authRoutes');
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const projectRoutes = require('./src/routes/projectRoutes');
+const taskRoutes = require('./src/routes/taskRoutes');
+const timeTrackingRoutes = require('./src/routes/timeTrackingRoutes');
+const billingRoutes = require('./src/routes/billingRoutes');
 
 const app = express();
 
@@ -17,10 +21,23 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/time-tracking', timeTrackingRoutes);
+app.use('/api/billing', billingRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Server is running' });
+});
+
+// 404 handler - catch all unmatched API routes
+app.use('/api', (req, res) => {
+  console.log(`⚠️  404 - Route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ 
+    success: false, 
+    message: `Route not found: ${req.method} ${req.originalUrl}`
+  });
 });
 
 // Error handling

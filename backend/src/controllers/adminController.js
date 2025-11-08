@@ -49,8 +49,13 @@ exports.getAllUsers = async (req, res) => {
 exports.assignRole = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { role } = req.body;
+    let { role } = req.body;
     const adminId = req.user.userId; // From auth middleware
+
+    // If role is null or empty, default to team_member
+    if (!role || role === '' || role === 'null') {
+      role = 'team_member';
+    }
 
     // Validate role
     const validRoles = ['admin', 'project_manager', 'team_member'];
@@ -119,5 +124,47 @@ exports.rejectUser = async (req, res) => {
   } catch (error) {
     console.error('Reject user error:', error);
     res.status(500).json({ success: false, message: 'Failed to reject user' });
+  }
+};
+
+// Remove user permanently (Admin only)
+exports.removeUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const adminId = req.user.userId;
+
+    // Prevent admin from removing themselves
+    if (parseInt(userId) === parseInt(adminId)) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'You cannot remove your own account' 
+      });
+    }
+
+    // Get user details before deletion
+    const userResult = await db.query(
+      'SELECT email, first_name, last_name, role FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+
+    const userToDelete = userResult.rows[0];
+
+    // Delete user (CASCADE will handle related data)
+    await db.query('DELETE FROM users WHERE id = $1', [userId]);
+
+    res.json({
+      success: true,
+      message: `User ${userToDelete.first_name} ${userToDelete.last_name} (${userToDelete.email}) has been permanently removed`
+    });
+  } catch (error) {
+    console.error('Remove user error:', error);
+    res.status(500).json({ success: false, message: 'Failed to remove user' });
   }
 };

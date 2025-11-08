@@ -7,7 +7,7 @@ const isValidEmail = (email) => {
 
 // Signup validation
 exports.signupValidation = (req, res, next) => {
-  const { email, password, confirmPassword, firstName, lastName } = req.body;
+  const { email, password, firstName, lastName } = req.body;
   const errors = [];
 
   if (!email || !isValidEmail(email)) {
@@ -15,12 +15,6 @@ exports.signupValidation = (req, res, next) => {
   }
   if (!password || password.length < 6) {
     errors.push({ field: 'password', message: 'Password must be at least 6 characters' });
-  }
-  if (!confirmPassword) {
-    errors.push({ field: 'confirmPassword', message: 'Please confirm your password' });
-  }
-  if (password && confirmPassword && password !== confirmPassword) {
-    errors.push({ field: 'confirmPassword', message: 'Passwords do not match' });
   }
   if (!firstName || firstName.trim() === '') {
     errors.push({ field: 'firstName', message: 'First name is required' });

@@ -31,3 +31,19 @@ coverage/
 *.tmp
 temp/
 tmp/
+
+# Test and debug files (exclude temporary test files, keep setup scripts)
+test-*.js
+check-*.js
+debug-*.js
+setup-test-*.js
+verify-*.js
+view-*.js
+show-*.js
+demo-*.js
+list-users.js
+reset-admin-password.js
+add-phone-column.js
+add-department-column.js
+add-task-delegation.js
+add-team-members.js

@@ -8,15 +8,18 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Signup - Register new user and send OTP (NO ROLE ASSIGNED YET)
+// Signup - Register new user and send OTP
 exports.signup = async (req, res) => {
   console.log('📝 Signup request received:', req.body.email);
   try {
-    const { email, password, confirmPassword, firstName, lastName } = req.body;
+    const { email, password, firstName, lastName, phone, role } = req.body;
 
-    // Validate password confirmation
-    if (password !== confirmPassword) {
-      return res.status(400).json({ success: false, message: 'Passwords do not match' });
+    // Validate required fields
+    if (!email || !password || !firstName || !lastName) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email, password, first name, and last name are required' 
+      });
     }
 
     console.log('1. Checking if user exists...');
@@ -36,13 +39,19 @@ exports.signup = async (req, res) => {
     const otp = generateOTP();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    console.log('4. Creating user in database (NO ROLE - pending admin approval)...');
-    // Create user WITHOUT role - will be assigned by admin after verification
+    console.log('4. Creating user in database...');
+    
+    // All new users need admin approval to assign role
+    const userRole = null; // No role assigned until admin approves
+    const needsApproval = true; // All users need admin approval
+    const isRoleApproved = false; // Admin must approve
+    
+    // Create user WITHOUT role (admin will assign later)
     const result = await db.query(
-      `INSERT INTO users (email, password, first_name, last_name, role, verification_otp, verification_otp_expires, role_approved, pending_approval)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, email, first_name, last_name`,
-      [email, hashedPassword, firstName, lastName, null, otp, otpExpires, false, true]
+      `INSERT INTO users (email, password, first_name, last_name, phone, role, verification_otp, verification_otp_expires, role_approved, pending_approval)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING id, email, first_name, last_name, role, phone`,
+      [email, hashedPassword, firstName, lastName, phone || null, userRole, otp, otpExpires, isRoleApproved, needsApproval]
     );
 
     const user = result.rows[0];
@@ -54,10 +63,15 @@ exports.signup = async (req, res) => {
       .catch(err => console.error('❌ Email error:', err.message));
 
     console.log('6. Sending response...');
+    
     res.status(201).json({
       success: true,
-      message: 'Registration successful! Please check your email for verification code. After verification, wait for admin approval to assign your role.',
-      data: { userId: user.id, email: user.email }
+      message: 'Registration successful! Please check your email for verification code. After verification, wait for admin approval.',
+      data: { 
+        userId: user.id, 
+        email: user.email,
+        needsApproval: true
+      }
     });
     console.log('✅ Response sent');
   } catch (error) {
@@ -93,9 +107,14 @@ exports.verifyEmail = async (req, res) => {
       [email]
     );
 
+    // Return simple success message - user needs to login separately
+    const message = user.pending_approval 
+      ? 'Email verified successfully! Your account is pending admin approval. Please wait for admin to approve your role before logging in.'
+      : 'Email verified successfully! You can now login with your credentials.';
+
     res.json({
       success: true,
-      message: 'Email verified successfully! You can now login.'
+      message
     });
   } catch (error) {
     console.error('Verify email error:', error);
@@ -240,5 +259,195 @@ exports.resetPassword = async (req, res) => {
   } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({ success: false, message: 'Password reset failed' });
+  }
+};
+
+// Resend OTP - Resend verification OTP
+exports.resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    // Find user
+    const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const user = result.rows[0];
+
+    // Check if already verified
+    if (user.is_verified) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email is already verified' 
+      });
+    }
+
+    // Generate new OTP
+    const otp = generateOTP();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Update OTP in database
+    await db.query(
+      'UPDATE users SET verification_otp = $1, verification_otp_expires = $2 WHERE email = $3',
+      [otp, otpExpires, email]
+    );
+
+    // Send verification email
+    sendVerificationEmail(email, otp, `${user.first_name} ${user.last_name}`)
+      .then(() => console.log(`✅ OTP resent to ${email}`))
+      .catch(err => console.error('❌ Email error:', err.message));
+
+    res.json({
+      success: true,
+      message: 'Verification code has been resent to your email'
+    });
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    res.status(500).json({ success: false, message: 'Failed to resend verification code' });
+  }
+};
+
+// Update Profile - Update user profile information
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { firstName, lastName, phone, department } = req.body;
+
+    // Build update query dynamically
+    const updates = [];
+    const values = [];
+    let paramCount = 1;
+
+    if (firstName !== undefined) {
+      updates.push(`first_name = $${paramCount}`);
+      values.push(firstName);
+      paramCount++;
+    }
+
+    if (lastName !== undefined) {
+      updates.push(`last_name = $${paramCount}`);
+      values.push(lastName);
+      paramCount++;
+    }
+
+    if (phone !== undefined) {
+      updates.push(`phone = $${paramCount}`);
+      values.push(phone);
+      paramCount++;
+    }
+
+    if (department !== undefined) {
+      updates.push(`department = $${paramCount}`);
+      values.push(department);
+      paramCount++;
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No fields to update' 
+      });
+    }
+
+    values.push(userId);
+    const query = `
+      UPDATE users 
+      SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $${paramCount}
+      RETURNING id, email, first_name, last_name, phone, department, role
+    `;
+
+    const result = await db.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        user: result.rows[0]
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update profile' 
+    });
+  }
+};
+
+// Change Password - Change password for authenticated user
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Current password and new password are required' 
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'New password must be at least 6 characters' 
+      });
+    }
+
+    // Get current user
+    const userResult = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    
+    if (!isValidPassword) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Current password is incorrect' 
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await db.query(
+      'UPDATE users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      [hashedPassword, userId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to change password' 
+    });
   }
 };
