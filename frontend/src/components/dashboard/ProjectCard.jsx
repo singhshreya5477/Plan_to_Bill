@@ -42,14 +42,27 @@ const ProjectCard = ({ project }) => {
 
       {/* Cover Image */}
       <div className="relative h-32 overflow-hidden">
-        <img
-          src={project.coverImage || 'https://via.placeholder.com/400x200'}
-          alt={project.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110"
-          onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/400x200?text=Project+Image';
-          }}
-        />
+        {project.coverImage ? (
+          <img
+            src={project.coverImage}
+            alt={project.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110"
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
+        ) : (
+          <div 
+            className="w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110"
+            style={{ 
+              background: `linear-gradient(135deg, ${project.color}20, ${project.color}40)`,
+            }}
+          >
+            <span className="text-2xl font-bold opacity-30" style={{ color: project.color }}>
+              {project.name?.charAt(0) || 'P'}
+            </span>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
         <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity"
           style={{ background: `linear-gradient(135deg, ${project.color}, transparent)` }}
