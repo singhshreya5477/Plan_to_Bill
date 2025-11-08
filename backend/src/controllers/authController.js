@@ -8,11 +8,16 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Signup - Register new user and send OTP
+// Signup - Register new user and send OTP (NO ROLE ASSIGNED YET)
 exports.signup = async (req, res) => {
   console.log('📝 Signup request received:', req.body.email);
   try {
-    const { email, password, firstName, lastName, role } = req.body;
+    const { email, password, confirmPassword, firstName, lastName } = req.body;
+
+    // Validate password confirmation
+    if (password !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
+    }
 
     console.log('1. Checking if user exists...');
     // Check if user exists
@@ -31,13 +36,13 @@ exports.signup = async (req, res) => {
     const otp = generateOTP();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    console.log('4. Creating user in database...');
-    // Create user
+    console.log('4. Creating user in database (NO ROLE - pending admin approval)...');
+    // Create user WITHOUT role - will be assigned by admin after verification
     const result = await db.query(
-      `INSERT INTO users (email, password, first_name, last_name, role, verification_otp, verification_otp_expires)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, email, first_name, last_name, role`,
-      [email, hashedPassword, firstName, lastName, role || 'team_member', otp, otpExpires]
+      `INSERT INTO users (email, password, first_name, last_name, role, verification_otp, verification_otp_expires, role_approved, pending_approval)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id, email, first_name, last_name`,
+      [email, hashedPassword, firstName, lastName, null, otp, otpExpires, false, true]
     );
 
     const user = result.rows[0];
@@ -51,7 +56,7 @@ exports.signup = async (req, res) => {
     console.log('6. Sending response...');
     res.status(201).json({
       success: true,
-      message: 'Registration successful! Please check your email for verification code.',
+      message: 'Registration successful! Please check your email for verification code. After verification, wait for admin approval to assign your role.',
       data: { userId: user.id, email: user.email }
     });
     console.log('✅ Response sent');
@@ -116,6 +121,24 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Please verify your email first' });
     }
 
+    // Check if role is approved by admin
+    if (user.pending_approval || !user.role_approved) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Your account is pending admin approval. Please wait for the admin to assign your role.',
+        pending: true
+      });
+    }
+
+    // Check if role is assigned
+    if (!user.role) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'No role assigned. Please contact admin.',
+        pending: true
+      });
+    }
+
     // Check password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
@@ -137,8 +160,8 @@ exports.login = async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
-          firstName: user.first_name,
-          lastName: user.last_name,
+          first_name: user.first_name,
+          last_name: user.last_name,
           role: user.role
         }
       }
