@@ -1,8 +1,19 @@
 import { useState } from 'react';
-import { FiPlus, FiFilter, FiSearch, FiCreditCard } from 'react-icons/fi';
+import { FiPlus, FiFilter, FiSearch, FiCreditCard, FiX, FiCalendar, FiFileText, FiDollarSign } from 'react-icons/fi';
 
 const VendorBills = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    vendor: '',
+    project: '',
+    purchaseOrder: '',
+    amount: '',
+    billDate: new Date().toISOString().split('T')[0],
+    dueDate: '',
+    description: '',
+    status: 'pending'
+  });
 
   const mockVendorBills = [
     {
@@ -44,6 +55,36 @@ const VendorBills = () => {
     overdue: 'badge-on-hold'
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO: Add API call to save vendor bill
+    console.log('Vendor Bill Data:', formData);
+    alert('Vendor bill recorded successfully! (This will be integrated with backend)');
+    setShowModal(false);
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setFormData({
+      vendor: '',
+      project: '',
+      purchaseOrder: '',
+      amount: '',
+      billDate: new Date().toISOString().split('T')[0],
+      dueDate: '',
+      description: '',
+      status: 'pending'
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -52,7 +93,10 @@ const VendorBills = () => {
           <h1 className="text-3xl font-bold text-gray-900">Vendor Bills</h1>
           <p className="text-gray-600 mt-2">Track costs and vendor payments</p>
         </div>
-        <button className="btn-primary flex items-center">
+        <button 
+          className="btn-primary flex items-center"
+          onClick={() => setShowModal(true)}
+        >
           <FiPlus className="mr-2" />
           Record Bill
         </button>
@@ -181,6 +225,213 @@ const VendorBills = () => {
           </table>
         </div>
       </div>
+
+      {/* Record Bill Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-scale-in" 
+            style={{ backgroundColor: 'rgb(var(--bg-secondary))' }}>
+            
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b flex items-center justify-between" 
+              style={{ borderColor: 'rgb(var(--border-color))' }}>
+              <div>
+                <h2 className="text-xl font-bold" style={{ color: 'rgb(var(--text-primary))' }}>
+                  Record Vendor Bill
+                </h2>
+                <p className="text-sm mt-1" style={{ color: 'rgb(var(--text-secondary))' }}>
+                  Enter vendor bill details
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  resetForm();
+                }}
+                className="p-2 rounded-lg hover:opacity-70 transition-opacity"
+                style={{ color: 'rgb(var(--text-tertiary))' }}
+              >
+                <FiX className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+              
+              {/* Vendor Name */}
+              <div>
+                <label className="block text-sm font-medium mb-2" 
+                  style={{ color: 'rgb(var(--text-primary))' }}>
+                  Vendor Name *
+                </label>
+                <input
+                  type="text"
+                  name="vendor"
+                  value={formData.vendor}
+                  onChange={handleChange}
+                  className="input-field w-full"
+                  placeholder="Enter vendor name"
+                  required
+                />
+              </div>
+
+              {/* Project */}
+              <div>
+                <label className="block text-sm font-medium mb-2" 
+                  style={{ color: 'rgb(var(--text-primary))' }}>
+                  Project
+                </label>
+                <input
+                  type="text"
+                  name="project"
+                  value={formData.project}
+                  onChange={handleChange}
+                  className="input-field w-full"
+                  placeholder="Enter project name"
+                />
+              </div>
+
+              {/* Purchase Order */}
+              <div>
+                <label className="block text-sm font-medium mb-2" 
+                  style={{ color: 'rgb(var(--text-primary))' }}>
+                  Purchase Order #
+                </label>
+                <input
+                  type="text"
+                  name="purchaseOrder"
+                  value={formData.purchaseOrder}
+                  onChange={handleChange}
+                  className="input-field w-full"
+                  placeholder="PO-XXX"
+                />
+              </div>
+
+              {/* Amount */}
+              <div>
+                <label className="block text-sm font-medium mb-2" 
+                  style={{ color: 'rgb(var(--text-primary))' }}>
+                  Amount (₹) *
+                </label>
+                <div className="relative">
+                  <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                    style={{ color: 'rgb(var(--text-tertiary))' }} />
+                  <input
+                    type="number"
+                    name="amount"
+                    value={formData.amount}
+                    onChange={handleChange}
+                    className="input-field w-full pl-10"
+                    placeholder="Enter amount"
+                    step="0.01"
+                    min="0"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Dates */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2" 
+                    style={{ color: 'rgb(var(--text-primary))' }}>
+                    Bill Date *
+                  </label>
+                  <div className="relative">
+                    <FiCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                      style={{ color: 'rgb(var(--text-tertiary))' }} />
+                    <input
+                      type="date"
+                      name="billDate"
+                      value={formData.billDate}
+                      onChange={handleChange}
+                      className="input-field w-full pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2" 
+                    style={{ color: 'rgb(var(--text-primary))' }}>
+                    Due Date *
+                  </label>
+                  <div className="relative">
+                    <FiCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                      style={{ color: 'rgb(var(--text-tertiary))' }} />
+                    <input
+                      type="date"
+                      name="dueDate"
+                      value={formData.dueDate}
+                      onChange={handleChange}
+                      className="input-field w-full pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium mb-2" 
+                  style={{ color: 'rgb(var(--text-primary))' }}>
+                  Description
+                </label>
+                <div className="relative">
+                  <FiFileText className="absolute left-3 top-3" 
+                    style={{ color: 'rgb(var(--text-tertiary))' }} />
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={3}
+                    className="input-field w-full pl-10 resize-none"
+                    placeholder="Enter bill description or notes..."
+                  />
+                </div>
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium mb-2" 
+                  style={{ color: 'rgb(var(--text-primary))' }}>
+                  Status
+                </label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="input-field w-full"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                </select>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex items-center gap-3 pt-4 border-t" 
+                style={{ borderColor: 'rgb(var(--border-color))' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
+                  className="btn-secondary flex-1"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary flex-1"
+                >
+                  Record Bill
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

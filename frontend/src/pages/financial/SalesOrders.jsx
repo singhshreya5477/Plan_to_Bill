@@ -243,7 +243,8 @@ const SalesOrders = () => {
         <CreateFinancialModal
           isOpen={showCreateModal}
           onClose={handleModalClose}
-          type="sales_order"
+          onSuccess={handleModalClose}
+          type="sales-orders"
           initialData={modalMode === 'edit' ? selectedOrder : null}
           isEditing={modalMode === 'edit'}
         />

@@ -9,7 +9,7 @@ const logTime = async (req, res) => {
     
     try {
         const userId = req.user.userId;
-        const { project_id, task_id, description, hours, log_date, is_billable } = req.body;
+        const { project_id, task_id, description, hours, log_date, is_billable, hourly_rate } = req.body;
 
         // Validate required fields
         if (!project_id || !hours) {
@@ -33,20 +33,25 @@ const logTime = async (req, res) => {
             });
         }
 
-        // Get applicable billing rate
-        const rateQuery = await client.query(
-            `SELECT rate FROM billing_rates 
-             WHERE project_id = $1 
-             AND (user_id = $2 OR user_id IS NULL)
-             AND is_active = true
-             AND (effective_from <= CURRENT_DATE)
-             AND (effective_to IS NULL OR effective_to >= CURRENT_DATE)
-             ORDER BY user_id NULLS LAST, effective_from DESC
-             LIMIT 1`,
-            [project_id, userId]
-        );
+        // Use provided hourly_rate, or get from billing_rates if not provided
+        let finalHourlyRate = hourly_rate || null;
+        
+        if (!finalHourlyRate) {
+            // Get applicable billing rate from database
+            const rateQuery = await client.query(
+                `SELECT rate FROM billing_rates 
+                 WHERE project_id = $1 
+                 AND (user_id = $2 OR user_id IS NULL)
+                 AND is_active = true
+                 AND (effective_from <= CURRENT_DATE)
+                 AND (effective_to IS NULL OR effective_to >= CURRENT_DATE)
+                 ORDER BY user_id NULLS LAST, effective_from DESC
+                 LIMIT 1`,
+                [project_id, userId]
+            );
 
-        const hourlyRate = rateQuery.rows[0]?.rate || null;
+            finalHourlyRate = rateQuery.rows[0]?.rate || null;
+        }
 
         // Insert time log
         const result = await client.query(
@@ -62,7 +67,7 @@ const logTime = async (req, res) => {
                 hours, 
                 log_date || new Date(), 
                 is_billable !== undefined ? is_billable : true,
-                hourlyRate
+                finalHourlyRate
             ]
         );
 
@@ -291,7 +296,7 @@ const updateTimeLog = async (req, res) => {
         const { id } = req.params;
         const userId = req.user.userId;
         const userRole = req.user.role;
-        const { description, hours, log_date, is_billable } = req.body;
+        const { description, hours, log_date, is_billable, hourly_rate } = req.body;
 
         // Check if time log exists and user owns it
         const checkResult = await client.query(
@@ -342,6 +347,12 @@ const updateTimeLog = async (req, res) => {
         if (is_billable !== undefined) {
             updates.push(`is_billable = $${paramCount}`);
             params.push(is_billable);
+            paramCount++;
+        }
+
+        if (hourly_rate !== undefined) {
+            updates.push(`hourly_rate = $${paramCount}`);
+            params.push(hourly_rate);
             paramCount++;
         }
 

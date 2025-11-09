@@ -48,35 +48,71 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 flex flex-col transition-all" style={{ 
+    <div className="w-64 flex flex-col transition-all relative overflow-hidden" style={{ 
       backgroundColor: 'rgb(var(--sidebar-bg))', 
       color: 'rgb(var(--sidebar-text))' 
     }}>
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-purple-500 to-transparent blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-0 w-full h-64 bg-gradient-to-t from-blue-500 to-transparent blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+      
+      {/* Cyber grid background */}
+      <div className="absolute inset-0 cyber-grid opacity-5 pointer-events-none"></div>
+      
       {/* Logo */}
-      <div className="p-6 border-b transition-colors" style={{ borderColor: 'rgb(var(--border-color))' }}>
-        <h1 className="text-2xl font-bold" style={{ color: 'rgb(var(--primary))' }}>OneFlow</h1>
-        <p className="text-xs mt-1" style={{ color: 'rgb(var(--text-tertiary))' }}>Plan to Bill in One Place</p>
+      <div className="p-6 border-b transition-colors relative z-10 group" style={{ borderColor: 'rgb(var(--border-color))' }}>
+        <div className="relative">
+          {/* Glowing background on hover */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-10 blur-xl transition-opacity rounded-lg"></div>
+          
+          <h1 className="text-2xl font-black relative inline-block holographic group-hover:scale-105 transition-transform">
+            OneFlow
+          </h1>
+          
+          {/* Animated underline */}
+          <div className="h-0.5 w-0 group-hover:w-full transition-all duration-500 bg-gradient-to-r from-purple-500 to-blue-500 mt-1"></div>
+        </div>
+        <p className="text-xs mt-2 transition-all group-hover:translate-x-1" style={{ color: 'rgb(var(--text-tertiary))' }}>
+          Plan to Bill in One Place
+        </p>
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4">
+      <nav className="flex-1 overflow-y-auto py-4 relative z-10">
         <div className="px-3 space-y-1">
-          {navigation.filter(item => hasAccess(item.roles)).map((item) => (
+          {navigation.filter(item => hasAccess(item.roles)).map((item, idx) => (
             <NavLink
               key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                  isActive ? 'text-white' : ''
+                `flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all group relative overflow-hidden animate-slide-in-right ${
+                  isActive ? 'text-white shadow-lg' : 'hover:translate-x-1'
                 }`
               }
               style={({ isActive }) => ({
                 backgroundColor: isActive ? 'rgb(var(--primary))' : 'transparent',
-                color: isActive ? 'white' : 'rgb(var(--sidebar-text))'
+                color: isActive ? 'white' : 'rgb(var(--sidebar-text))',
+                animationDelay: `${idx * 100}ms`,
+                boxShadow: isActive ? '0 4px 15px rgba(var(--primary), 0.4)' : 'none'
               })}
             >
-              <item.icon className="mr-3 h-5 w-5" />
-              {item.name}
+              {/* Hover gradient effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              
+              {/* Active indicator bar */}
+              {location.pathname === item.path && (
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-white/0 via-white to-white/0 animate-pulse"></div>
+              )}
+              
+              <item.icon className="mr-3 h-5 w-5 group-hover:scale-110 group-hover:rotate-6 transition-all relative z-10" />
+              <span className="relative z-10 group-hover:font-semibold transition-all">{item.name}</span>
+              
+              {/* Shimmer on hover */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+              </div>
             </NavLink>
           ))}
         </div>

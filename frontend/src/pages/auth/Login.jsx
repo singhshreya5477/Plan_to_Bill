@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle, FiArrowRight, FiZap, FiShield, FiUsers } from 'react-icons/fi';
 import { useAuthStore } from '../../store/authStore';
 import authService from '../../services/authService';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -133,7 +134,12 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex relative overflow-hidden" 
-      style={{ background: 'linear-gradient(180deg,#ffffff,#fbf7ff)' }}>
+      style={{ backgroundColor: 'rgb(var(--bg-primary))' }}>
+      
+      {/* Theme Toggle - Fixed Top Right */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
       
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -163,17 +169,17 @@ const Login = () => {
       {/* Left Side - Info */}
       <div className="hidden lg:flex lg:w-1/2 relative z-10 p-12 flex-col justify-center">
         <Link to="/landing" className="flex items-center space-x-3 mb-12 animate-slide-in-right">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg" style={{ background: '#ffffff', color: '#6D28D9', border: '1px solid #eee' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg" style={{ backgroundColor: 'rgb(var(--bg-secondary))', color: 'rgb(var(--primary))', border: '1px solid rgb(var(--border-color))' }}>
             P2B
           </div>
-          <span className="text-3xl font-bold" style={{ color: '#2b2540' }}>Plan-to-Bill</span>
+          <span className="text-3xl font-bold" style={{ color: 'rgb(var(--text-primary))' }}>Plan-to-Bill</span>
         </Link>
 
         <div className="max-w-md">
-          <h1 className="text-5xl font-bold mb-6 animate-slide-up" style={{ color: '#2b2540' }}>
+          <h1 className="text-5xl font-bold mb-6 animate-slide-up" style={{ color: 'rgb(var(--text-primary))' }}>
             Welcome Back to Your Workspace
           </h1>
-          <p className="text-xl mb-8 animate-slide-up delay-100" style={{ color: '#6b677d' }}>
+          <p className="text-xl mb-8 animate-slide-up delay-100" style={{ color: 'rgb(var(--text-secondary))' }}>
             Continue managing your projects, tracking time, and billing clients—all in one place.
           </p>
 
@@ -224,7 +230,7 @@ const Login = () => {
       <div className="w-full lg:w-1/2 relative z-10 flex items-center justify-center p-6 lg:p-12">
           <div className="max-w-md w-full">
           <div className="rounded-2xl shadow-2xl p-8 transition-all animate-slide-up hover-lift" 
-            style={{ background: '#ffffff', border: '1px solid rgba(107,103,125,0.06)' }}>
+            style={{ backgroundColor: 'rgb(var(--bg-secondary))', border: '1px solid rgb(var(--border-color))' }}>
             
             {/* Mobile Logo */}
             <Link to="/landing" className="lg:hidden flex items-center justify-center space-x-3 mb-6">
@@ -236,10 +242,10 @@ const Login = () => {
 
             {/* Header */}
             <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2" style={{ color: '#2b2540' }}>
+              <h2 className="text-3xl font-bold mb-2" style={{ color: 'rgb(var(--text-primary))' }}>
                 Sign In
               </h2>
-              <p style={{ color: '#6b677d' }}>
+              <p style={{ color: 'rgb(var(--text-secondary))' }}>
                 Welcome back! Please enter your details
               </p>
             </div>
@@ -254,7 +260,7 @@ const Login = () => {
               </label>
               <div className="relative group">
                 <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 transition-all group-hover:scale-110" 
-                  style={{ color: '#a99fd6' }} />
+                  style={{ color: 'rgb(var(--text-tertiary))' }} />
                 <input
                   type="email"
                   name="email"
@@ -263,11 +269,11 @@ const Login = () => {
                   onBlur={handleEmailBlur}
                   className="input-field pl-10 transition-all focus:scale-[1.02]"
                   placeholder="Enter your email"
-                  style={emailError ? { borderColor: '#ef4444' } : {}}
+                  style={emailError ? { borderColor: 'rgb(var(--error))' } : {}}
                 />
               </div>
               {emailError && (
-                <p className="text-xs mt-1.5 flex items-center" style={{ color: '#3b82f6' }}>
+                <p className="text-xs mt-1.5 flex items-center" style={{ color: 'rgb(var(--error))' }}>
                   <span className="mr-1">ℹ</span> {emailError}
                 </p>
               )}
@@ -280,7 +286,7 @@ const Login = () => {
               </label>
               <div className="relative group">
                 <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 transition-all group-hover:scale-110" 
-                  style={{ color: '#a99fd6' }} />
+                  style={{ color: 'rgb(var(--text-tertiary))' }} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -289,13 +295,13 @@ const Login = () => {
                   onBlur={handlePasswordBlur}
                   className="input-field pl-10 pr-12 transition-all focus:scale-[1.02]"
                   placeholder="Enter your password"
-                  style={passwordError ? { borderColor: '#ef4444' } : {}}
+                  style={passwordError ? { borderColor: 'rgb(var(--error))' } : {}}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:opacity-70 transition-opacity"
-                  style={{ color: '#a99fd6' }}
+                  style={{ color: 'rgb(var(--text-tertiary))' }}
                 >
                   {showPassword ? (
                     <span className="flex items-center text-xs font-medium">
@@ -309,7 +315,7 @@ const Login = () => {
                 </button>
               </div>
               {passwordError && (
-                <p className="text-xs mt-1.5 flex items-center" style={{ color: '#3b82f6' }}>
+                <p className="text-xs mt-1.5 flex items-center" style={{ color: 'rgb(var(--error))' }}>
                   <span className="mr-1">ℹ</span> {passwordError}
                 </p>
               )}
@@ -324,7 +330,7 @@ const Login = () => {
                   checked={formData.rememberMe}
                   onChange={handleChange}
                   className="w-4 h-4 rounded"
-                  style={{ accentColor: '#6D28D9' }}
+                  style={{ accentColor: 'rgb(var(--primary))' }}
                 />
                 <span className="text-sm" style={{ color: 'rgb(var(--text-secondary))' }}>
                   Remember me
@@ -342,7 +348,7 @@ const Login = () => {
             {/* Error Message */}
             {error && (
               <div className="px-4 py-3 rounded-lg text-sm flex items-start" 
-                style={{ backgroundColor: 'rgb(239 68 68 / 0.1)', color: '#dc2626' }}>
+                style={{ backgroundColor: 'rgb(var(--error) / 0.1)', color: 'rgb(var(--error))' }}>
                 <FiAlertCircle className="mr-2 mt-0.5 flex-shrink-0" />
                 <div>
                   <strong className="font-medium">Error</strong>
@@ -355,8 +361,7 @@ const Login = () => {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full py-3 font-medium flex items-center justify-center group rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: 'linear-gradient(90deg,#6D28D9,#8B5CF6)', color: '#fff', boxShadow: '0 8px 30px rgba(109,40,217,0.12)' }}
+              className="w-full py-3 font-medium flex items-center justify-center group rounded-lg disabled:opacity-50 disabled:cursor-not-allowed btn-primary"
             >
               {isLoading ? (
                 <>

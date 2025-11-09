@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiLock, FiArrowLeft, FiCheck, FiMail } from 'react-icons/fi';
 import authService from '../../services/authService';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const ResetPassword = () => {
   const location = useLocation();
@@ -78,6 +79,11 @@ const ResetPassword = () => {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'rgb(var(--bg-primary))' }}>
+        {/* Theme Toggle - Fixed Top Right */}
+        <div className="fixed top-6 right-6 z-50">
+          <ThemeToggle />
+        </div>
+        
         <div className="card max-w-md w-full">
           <div className="text-center">
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgb(var(--success) / 0.1)' }}>
@@ -95,6 +101,11 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'rgb(var(--bg-primary))' }}>
+      {/* Theme Toggle - Fixed Top Right */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+      
       <div className="card max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2" style={{ color: 'rgb(var(--text-primary))' }}>Reset Password</h1>

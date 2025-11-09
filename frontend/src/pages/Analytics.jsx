@@ -1,4 +1,5 @@
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { FiTrendingUp, FiCheckCircle, FiClock, FiDollarSign, FiBarChart2, FiUsers, FiActivity, FiPieChart } from 'react-icons/fi';
 
 const Analytics = () => {
   // Mock data for charts
@@ -33,92 +34,261 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-        <p className="text-gray-600 mt-2">Insights into project progress, utilization, and profitability</p>
+      {/* Header with animated background */}
+      <div className="relative">
+        {/* Floating gradient blobs */}
+        <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full opacity-10 gradient-bg-purple blob-animate pointer-events-none" style={{ filter: 'blur(60px)' }}></div>
+        <div className="absolute -top-10 right-0 w-48 h-48 rounded-full opacity-10 gradient-bg-blue blob-animate pointer-events-none" style={{ filter: 'blur(50px)', animationDelay: '2s' }}></div>
+        
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold holographic animate-slide-in-right" style={{ color: 'rgb(var(--text-primary))' }}>
+            Analytics
+          </h1>
+          <p className="mt-2 animate-slide-in-right delay-100" style={{ color: 'rgb(var(--text-secondary))' }}>
+            Insights into project progress, utilization, and profitability
+          </p>
+        </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* Enhanced KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card">
-          <p className="text-sm text-gray-600 mb-1">Total Projects</p>
-          <p className="text-3xl font-bold text-gray-900">4</p>
-          <p className="text-sm text-green-600 mt-2">+1 this month</p>
+        {/* Total Projects Card */}
+        <div className="card group hover-lift cursor-pointer relative overflow-hidden animate-fade-in transition-all hover:shadow-2xl">
+          {/* Rotating gradient border */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{ background: 'linear-gradient(135deg, #6366f140, transparent)', filter: 'blur(10px)' }}
+          ></div>
+          
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm" style={{ color: 'rgb(var(--text-secondary))' }}>Total Projects</p>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-12"
+                style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                <FiBarChart2 className="w-5 h-5 text-white" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold mb-2 transition-all group-hover:scale-105" style={{ color: 'rgb(var(--text-primary))' }}>4</p>
+            <div className="flex items-center gap-1 text-sm" style={{ color: 'rgb(var(--success))' }}>
+              <FiTrendingUp className="w-4 h-4" />
+              <span>+1 this month</span>
+            </div>
+          </div>
         </div>
-        <div className="card">
-          <p className="text-sm text-gray-600 mb-1">Tasks Completed</p>
-          <p className="text-3xl font-bold text-gray-900">127</p>
-          <p className="text-sm text-green-600 mt-2">+15% vs last month</p>
+
+        {/* Tasks Completed Card */}
+        <div className="card group hover-lift cursor-pointer relative overflow-hidden animate-fade-in transition-all hover:shadow-2xl" style={{ animationDelay: '100ms' }}>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{ background: 'linear-gradient(135deg, #10b98140, transparent)', filter: 'blur(10px)' }}
+          ></div>
+          
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm" style={{ color: 'rgb(var(--text-secondary))' }}>Tasks Completed</p>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-12"
+                style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
+                <FiCheckCircle className="w-5 h-5 text-white" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold mb-2 transition-all group-hover:scale-105" style={{ color: 'rgb(var(--text-primary))' }}>127</p>
+            <div className="flex items-center gap-1 text-sm" style={{ color: 'rgb(var(--success))' }}>
+              <FiTrendingUp className="w-4 h-4" />
+              <span>+15% vs last month</span>
+            </div>
+          </div>
         </div>
-        <div className="card">
-          <p className="text-sm text-gray-600 mb-1">Hours Logged</p>
-          <p className="text-3xl font-bold text-gray-900">1,240</p>
-          <p className="text-sm text-blue-600 mt-2">780 billable</p>
+
+        {/* Hours Logged Card */}
+        <div className="card group hover-lift cursor-pointer relative overflow-hidden animate-fade-in transition-all hover:shadow-2xl" style={{ animationDelay: '200ms' }}>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{ background: 'linear-gradient(135deg, #06b6d440, transparent)', filter: 'blur(10px)' }}
+          ></div>
+          
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm" style={{ color: 'rgb(var(--text-secondary))' }}>Hours Logged</p>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-12"
+                style={{ background: 'linear-gradient(135deg, #06b6d4, #0284c7)' }}>
+                <FiClock className="w-5 h-5 text-white" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold mb-2 transition-all group-hover:scale-105" style={{ color: 'rgb(var(--text-primary))' }}>1,240</p>
+            <div className="flex items-center gap-1 text-sm" style={{ color: 'rgb(var(--accent))' }}>
+              <FiActivity className="w-4 h-4" />
+              <span>780 billable</span>
+            </div>
+          </div>
         </div>
-        <div className="card">
-          <p className="text-sm text-gray-600 mb-1">Total Revenue</p>
-          <p className="text-3xl font-bold text-gray-900">₹150K</p>
-          <p className="text-sm text-red-600 mt-2">₹27K profit</p>
+
+        {/* Total Revenue Card */}
+        <div className="card group hover-lift cursor-pointer relative overflow-hidden animate-fade-in transition-all hover:shadow-2xl" style={{ animationDelay: '300ms' }}>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{ background: 'linear-gradient(135deg, #f59e0b40, transparent)', filter: 'blur(10px)' }}
+          ></div>
+          
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm" style={{ color: 'rgb(var(--text-secondary))' }}>Total Revenue</p>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-12"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                <FiDollarSign className="w-5 h-5 text-white" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold mb-2 transition-all group-hover:scale-105" style={{ color: 'rgb(var(--text-primary))' }}>₹150K</p>
+            <div className="flex items-center gap-1 text-sm" style={{ color: 'rgb(var(--error))' }}>
+              <FiTrendingUp className="w-4 h-4" />
+              <span>₹27K profit</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Project Progress */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Progress</h3>
+        <div className="card group hover-lift transition-all hover:shadow-2xl relative overflow-hidden animate-fade-in" style={{ animationDelay: '400ms' }}>
+          {/* Gradient glow on hover */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{ background: 'radial-gradient(circle at top right, #8b5cf640, transparent)', filter: 'blur(40px)' }}
+          ></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold transition-all group-hover:translate-x-1" style={{ color: 'rgb(var(--text-primary))' }}>
+                Project Progress
+              </h3>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-12"
+                style={{ backgroundColor: 'rgb(var(--accent) / 0.1)' }}>
+                <FiBarChart2 className="w-4 h-4" style={{ color: 'rgb(var(--accent))' }} />
+              </div>
+            </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={projectProgressData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="progress" fill="#0ea5e9" name="Progress %" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border-color))" />
+              <XAxis dataKey="name" stroke="rgb(var(--text-secondary))" />
+              <YAxis stroke="rgb(var(--text-secondary))" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgb(var(--bg-secondary))',
+                  border: '1px solid rgb(var(--border-color))',
+                  color: 'rgb(var(--text-primary))'
+                }}
+              />
+              <Legend wrapperStyle={{ color: 'rgb(var(--text-primary))' }} />
+              <Bar dataKey="progress" fill="rgb(var(--accent))" name="Progress %" />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Resource Utilization */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Resource Utilization</h3>
+        <div className="card group hover-lift transition-all hover:shadow-2xl relative overflow-hidden animate-fade-in" style={{ animationDelay: '500ms' }}>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{ background: 'radial-gradient(circle at top left, #06b6d440, transparent)', filter: 'blur(40px)' }}
+          ></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold transition-all group-hover:translate-x-1" style={{ color: 'rgb(var(--text-primary))' }}>
+                Resource Utilization
+              </h3>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-12"
+                style={{ backgroundColor: 'rgb(var(--accent) / 0.1)' }}>
+                <FiUsers className="w-4 h-4" style={{ color: 'rgb(var(--accent))' }} />
+              </div>
+            </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={resourceUtilization}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="hours" fill="#0ea5e9" name="Hours Worked" />
-              <Bar dataKey="capacity" fill="#e2e8f0" name="Capacity" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border-color))" />
+              <XAxis dataKey="name" stroke="rgb(var(--text-secondary))" />
+              <YAxis stroke="rgb(var(--text-secondary))" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgb(var(--bg-secondary))',
+                  border: '1px solid rgb(var(--border-color))',
+                  color: 'rgb(var(--text-primary))'
+                }}
+              />
+              <Legend wrapperStyle={{ color: 'rgb(var(--text-primary))' }} />
+              <Bar dataKey="hours" fill="rgb(var(--accent))" name="Hours Worked" />
+              <Bar dataKey="capacity" fill="rgb(var(--text-tertiary))" name="Capacity" />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Cost vs Revenue */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Cost vs Revenue</h3>
+        <div className="card group hover-lift transition-all hover:shadow-2xl relative overflow-hidden animate-fade-in" style={{ animationDelay: '600ms' }}>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{ background: 'radial-gradient(circle at bottom right, #10b98140, transparent)', filter: 'blur(40px)' }}
+          ></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold transition-all group-hover:translate-x-1" style={{ color: 'rgb(var(--text-primary))' }}>
+                Project Cost vs Revenue
+              </h3>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-12"
+                style={{ backgroundColor: 'rgb(var(--success) / 0.1)' }}>
+                <FiDollarSign className="w-4 h-4" style={{ color: 'rgb(var(--success))' }} />
+              </div>
+            </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={costRevenueData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="cost" fill="#ef4444" name="Cost" />
-              <Bar dataKey="revenue" fill="#10b981" name="Revenue" />
-              <Bar dataKey="profit" fill="#0ea5e9" name="Profit" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border-color))" />
+              <XAxis dataKey="name" stroke="rgb(var(--text-secondary))" />
+              <YAxis stroke="rgb(var(--text-secondary))" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgb(var(--bg-secondary))',
+                  border: '1px solid rgb(var(--border-color))',
+                  color: 'rgb(var(--text-primary))'
+                }}
+              />
+              <Legend wrapperStyle={{ color: 'rgb(var(--text-primary))' }} />
+              <Bar dataKey="cost" fill="rgb(var(--error))" name="Cost" />
+              <Bar dataKey="revenue" fill="rgb(var(--success))" name="Revenue" />
+              <Bar dataKey="profit" fill="rgb(var(--accent))" name="Profit" />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Billable vs Non-billable */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Billable vs Non-billable Hours</h3>
+        <div className="card group hover-lift transition-all hover:shadow-2xl relative overflow-hidden animate-fade-in" style={{ animationDelay: '700ms' }}>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{ background: 'radial-gradient(circle at bottom left, #6366f140, transparent)', filter: 'blur(40px)' }}
+          ></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold transition-all group-hover:translate-x-1" style={{ color: 'rgb(var(--text-primary))' }}>
+                Billable vs Non-billable Hours
+              </h3>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-12"
+                style={{ backgroundColor: 'rgb(var(--accent) / 0.1)' }}>
+                <FiPieChart className="w-4 h-4" style={{ color: 'rgb(var(--accent))' }} />
+              </div>
+            </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -135,9 +305,16 @@ const Analytics = () => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgb(var(--bg-secondary))',
+                  border: '1px solid rgb(var(--border-color))',
+                  color: 'rgb(var(--text-primary))'
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>

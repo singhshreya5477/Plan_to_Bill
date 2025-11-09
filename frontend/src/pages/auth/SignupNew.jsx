@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fi';
 import { useAuthStore } from '../../store/authStore';
 import { useCompanyStore } from '../../store/companyStore';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const SignupNew = () => {
   const [formData, setFormData] = useState({
@@ -520,6 +521,12 @@ const SignupNew = () => {
   return (
     <div className="min-h-screen py-8 px-4 transition-colors overflow-y-auto" 
       style={{ backgroundColor: 'rgb(var(--bg-primary))' }}>
+      
+      {/* Theme Toggle - Fixed Top Right */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+      
       <div className="max-w-3xl mx-auto">
         <div className="rounded-2xl shadow-xl p-8 transition-all" 
           style={{ backgroundColor: 'rgb(var(--bg-secondary))' }}>

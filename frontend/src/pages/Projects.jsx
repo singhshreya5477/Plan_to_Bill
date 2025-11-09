@@ -218,47 +218,229 @@ const Projects = () => {
           </div>
         ) : projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map(project => (
-              <div key={project.id} className="border rounded-lg p-4 relative group hover:shadow-lg transition-all" style={{ borderColor: 'rgb(var(--border))' }}>
-                {/* Delete button */}
-                <button
-                  onClick={() => handleDeleteProject(project.id, project.name)}
-                  className="absolute top-2 right-2 p-2 rounded-lg bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                  title="Delete project"
+            {projects.map((project, index) => {
+              const projectColors = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6'];
+              const projectColor = projectColors[index % projectColors.length];
+              const progress = project.progress || Math.floor(Math.random() * 100);
+              
+              return (
+                <div 
+                  key={project.id} 
+                  className="rounded-xl overflow-hidden transition-all hover:shadow-2xl hover-lift group animate-fade-in relative border-2 cursor-pointer" 
+                  style={{ 
+                    backgroundColor: 'rgb(var(--bg-secondary))',
+                    borderColor: 'rgb(var(--border-color))'
+                  }}
+                  onClick={() => navigate(`/projects/${project.id}`)}
                 >
-                  <FiTrash2 className="w-4 h-4" />
-                </button>
+                  {/* Animated gradient border on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none -z-10"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${projectColor}40, transparent, ${projectColor}40)`,
+                      filter: 'blur(10px)'
+                    }}
+                  />
+                  
+                  {/* Holographic shimmer effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  </div>
+                  
+                  {/* Gradient overlay on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none"
+                    style={{ background: `linear-gradient(135deg, ${projectColor} 0%, transparent 100%)` }}
+                  />
+                  
+                  {/* Floating particle */}
+                  <div className="absolute top-4 right-4 w-2 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ backgroundColor: projectColor, boxShadow: `0 0 20px ${projectColor}` }}>
+                    <div className="absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: projectColor }}></div>
+                  </div>
+                  
+                  {/* Delete button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteProject(project.id, project.name);
+                    }}
+                    className="absolute top-3 right-3 p-2 rounded-lg bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 z-20 hover-scale shadow-lg"
+                    title="Delete project"
+                  >
+                    <FiTrash2 className="w-4 h-4" />
+                  </button>
 
-                <h3 className="font-semibold text-lg mb-2 pr-8" style={{ color: 'rgb(var(--text-primary))' }}>
-                  {project.name}
-                </h3>
-                <p className="text-sm mb-2" style={{ color: 'rgb(var(--text-secondary))' }}>
-                  {project.description || 'No description'}
-                </p>
-                <div className="flex items-center justify-between text-sm mb-2" style={{ color: 'rgb(var(--text-tertiary))' }}>
-                  <span>Budget: ₹{project.budget?.toLocaleString() || '0'}</span>
-                  <span className="capitalize px-2 py-1 rounded text-xs" style={{ 
-                    backgroundColor: project.status === 'active' ? 'rgb(16 185 129 / 0.1)' : 'rgb(107 114 128 / 0.1)',
-                    color: project.status === 'active' ? '#10b981' : 'rgb(var(--text-secondary))'
-                  }}>
-                    {project.status || 'active'}
-                  </span>
+                  {/* Status Badge */}
+                  <div className="p-3 flex flex-wrap gap-2 relative z-10">
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-bold transition-all hover-scale cursor-pointer shadow-md group-hover:shadow-lg backdrop-blur-sm relative overflow-hidden"
+                      style={{
+                        background: `linear-gradient(135deg, ${projectColor}50, ${projectColor}70)`,
+                        color: projectColor,
+                        border: `1px solid ${projectColor}30`
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700"></div>
+                      <span className="relative z-10">{project.status || 'Active'}</span>
+                    </span>
+                  </div>
+
+                  {/* Cover Image / Placeholder */}
+                  <div className="relative h-32 overflow-hidden">
+                    <div 
+                      className="w-full h-full flex items-center justify-center transition-all duration-700 group-hover:scale-110 relative overflow-hidden"
+                      style={{ 
+                        background: `linear-gradient(135deg, ${projectColor}15, ${projectColor}35)`,
+                      }}
+                    >
+                      {/* Cyber grid background */}
+                      <div className="absolute inset-0 cyber-grid opacity-20"></div>
+                      
+                      {/* Animated gradient blob */}
+                      <div className="absolute inset-0 opacity-30">
+                        <div 
+                          className="w-32 h-32 rounded-full blur-2xl blob-animate"
+                          style={{ background: `radial-gradient(circle, ${projectColor}80, transparent)` }}
+                        ></div>
+                      </div>
+                      
+                      <span className="text-5xl font-black opacity-20 relative z-10 group-hover:scale-110 transition-transform" 
+                        style={{ color: projectColor }}>
+                        {project.name?.charAt(0) || 'P'}
+                      </span>
+                    </div>
+                    
+                    {/* Layered gradients */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-70 group-hover:opacity-50 transition-opacity"></div>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-all duration-500"
+                      style={{ background: `linear-gradient(135deg, ${projectColor}, transparent)` }}
+                    ></div>
+                    
+                    {/* Glowing border at bottom of image */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ 
+                        background: `linear-gradient(90deg, transparent, ${projectColor}, transparent)`,
+                        boxShadow: `0 0 20px ${projectColor}`
+                      }}
+                    ></div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 space-y-3">
+                    {/* Title */}
+                    <div>
+                      <h3 
+                        className="text-lg font-bold line-clamp-1 transition-all group-hover:translate-x-1 relative inline-block"
+                        style={{ color: 'rgb(var(--text-primary))' }}
+                      >
+                        {project.name}
+                        {/* Animated underline */}
+                        <div className="absolute bottom-0 left-0 h-0.5 w-0 group-hover:w-full transition-all duration-500"
+                          style={{ backgroundColor: projectColor }}
+                        ></div>
+                      </h3>
+                      <p className="text-sm mt-1 line-clamp-2" style={{ color: 'rgb(var(--text-secondary))' }}>
+                        {project.description || 'No description'}
+                      </p>
+                    </div>
+
+                    {/* Metrics */}
+                    <div className="flex items-center gap-4 text-sm transition-all group-hover:translate-x-1" style={{ color: 'rgb(var(--text-secondary))' }}>
+                      {project.start_date && (
+                        <div className="flex items-center gap-1 hover-scale cursor-pointer group/metric transition-all hover:gap-2">
+                          <FiCalendar className="w-4 h-4 group-hover/metric:text-blue-500 transition-colors" />
+                          <span className="group-hover/metric:font-semibold transition-all">
+                            {new Date(project.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-1 hover-scale cursor-pointer group/metric transition-all hover:gap-2">
+                        <FiTag className="w-4 h-4 group-hover/metric:text-green-500 transition-colors" />
+                        <span className="group-hover/metric:font-semibold transition-all">₹{(project.budget || 0).toLocaleString()}</span>
+                      </div>
+                      
+                      {project.team_size > 0 && (
+                        <div className="flex items-center gap-1 hover-scale cursor-pointer group/metric transition-all hover:gap-2">
+                          <FiUser className="w-4 h-4 group-hover/metric:text-purple-500 transition-colors" />
+                          <span className="group-hover/metric:font-semibold transition-all">{project.team_size}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Progress Section */}
+                    <div className="pt-3 border-t transition-all" style={{ borderColor: 'rgb(var(--border-color))' }}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white transition-all group-hover:scale-125 group-hover:rotate-12 cursor-pointer shadow-lg relative overflow-hidden"
+                          style={{ 
+                            background: `linear-gradient(135deg, ${projectColor}, ${projectColor}cc)`,
+                            boxShadow: `0 4px 15px ${projectColor}50`
+                          }}
+                        >
+                          {/* Rotating ring */}
+                          <div className="absolute inset-0 rounded-full border-2 border-white/30 opacity-0 group-hover:opacity-100 animate-spin" style={{ animationDuration: '3s' }}></div>
+                          
+                          {/* Avatar text */}
+                          <span className="relative z-10">{project.name?.substring(0, 2).toUpperCase() || 'P'}</span>
+                          
+                          {/* Glow effect */}
+                          <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-50 transition-opacity"
+                            style={{ background: `radial-gradient(circle, ${projectColor}, transparent)`, filter: 'blur(8px)' }}
+                          ></div>
+                        </div>
+                        
+                        {/* Progress indicator with glow */}
+                        <div className="text-base font-black transition-all group-hover:scale-125 relative" 
+                          style={{ 
+                            color: projectColor,
+                            textShadow: `0 0 20px ${projectColor}60, 0 0 40px ${projectColor}40`
+                          }}>
+                          <span className="relative z-10">{progress}%</span>
+                          
+                          {/* Pulsing glow */}
+                          <div className="absolute inset-0 opacity-50 group-hover:animate-ping"
+                            style={{ color: projectColor }}
+                          >
+                            {progress}%
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Progress bar with multiple layers */}
+                      <div className="h-2.5 rounded-full overflow-hidden shadow-inner relative" 
+                        style={{ backgroundColor: 'rgb(var(--bg-tertiary))' }}>
+                        
+                        {/* Background pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+                        </div>
+                        
+                        {/* Main progress bar */}
+                        <div 
+                          className="h-full transition-all duration-1000 relative overflow-hidden rounded-full shadow-lg group-hover:shadow-2xl"
+                          style={{ 
+                            width: `${progress}%`,
+                            background: `linear-gradient(90deg, ${projectColor}dd, ${projectColor}, ${projectColor}dd)`,
+                            boxShadow: `0 0 15px ${projectColor}80, inset 0 1px 0 rgba(255,255,255,0.3)`
+                          }}
+                        >
+                          {/* Shimmer effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                          
+                          {/* Top highlight */}
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-b from-white/50 to-transparent"></div>
+                          
+                          {/* Pulse effect on hover */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse"
+                            style={{ backgroundColor: `${projectColor}30` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                {project.start_date && (
-                  <div className="text-xs" style={{ color: 'rgb(var(--text-tertiary))' }}>
-                    <FiCalendar className="inline w-3 h-3 mr-1" />
-                    {new Date(project.start_date).toLocaleDateString()} 
-                    {project.end_date && ` - ${new Date(project.end_date).toLocaleDateString()}`}
-                  </div>
-                )}
-                {project.team_size > 0 && (
-                  <div className="text-xs mt-1" style={{ color: 'rgb(var(--text-tertiary))' }}>
-                    <FiUser className="inline w-3 h-3 mr-1" />
-                    {project.team_size} team member{project.team_size !== 1 ? 's' : ''}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p style={{ color: 'rgb(var(--text-secondary))' }}>

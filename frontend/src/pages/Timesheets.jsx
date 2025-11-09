@@ -27,6 +27,7 @@ const Timesheets = () => {
     task_id: '',
     description: '',
     hours: '',
+    hourly_rate: '',
     log_date: new Date().toISOString().split('T')[0],
     is_billable: true
   });
@@ -69,6 +70,7 @@ const Timesheets = () => {
       const data = {
         ...formData,
         hours: parseFloat(formData.hours),
+        hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : null,
         task_id: formData.task_id || null
       };
 
@@ -97,6 +99,7 @@ const Timesheets = () => {
       task_id: log.task_id || '',
       description: log.description || '',
       hours: log.hours,
+      hourly_rate: log.hourly_rate || '',
       log_date: log.log_date.split('T')[0],
       is_billable: log.is_billable
     });
@@ -121,6 +124,7 @@ const Timesheets = () => {
       task_id: '',
       description: '',
       hours: '',
+      hourly_rate: '',
       log_date: new Date().toISOString().split('T')[0],
       is_billable: true
     });
@@ -129,6 +133,13 @@ const Timesheets = () => {
   const getBillablePercent = () => {
     if (!summary || summary.total_hours === 0) return 0;
     return Math.round((summary.billable_hours / summary.total_hours) * 100);
+  };
+
+  // Calculate amount based on hours and hourly rate
+  const calculateAmount = () => {
+    const hours = parseFloat(formData.hours) || 0;
+    const rate = parseFloat(formData.hourly_rate) || 0;
+    return hours * rate;
   };
 
   return (
@@ -431,6 +442,41 @@ const Timesheets = () => {
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--text-primary))' }}>
+                  Hourly Rate (₹)
+                </label>
+                <input
+                  type="number"
+                  value={formData.hourly_rate}
+                  onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value })}
+                  className="input-field w-full"
+                  step="50"
+                  min="0"
+                  placeholder="500"
+                />
+                <p className="text-xs mt-1" style={{ color: 'rgb(var(--text-secondary))' }}>
+                  Rate per hour for this work
+                </p>
+              </div>
+
+              {/* Show calculated amount */}
+              {(formData.hours && formData.hourly_rate) && (
+                <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgb(var(--bg-tertiary))' }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>
+                      Total Amount:
+                    </span>
+                    <span className="text-xl font-bold" style={{ color: 'rgb(var(--primary))' }}>
+                      ₹{calculateAmount().toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <p className="text-xs mt-1" style={{ color: 'rgb(var(--text-tertiary))' }}>
+                    {formData.hours} hours × ₹{parseFloat(formData.hourly_rate || 0).toLocaleString()} per hour
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="flex items-center gap-2 cursor-pointer">

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { FiMail, FiLock, FiUser, FiPhone, FiEye, FiEyeOff, FiCheck, FiAlertCircle, FiCheckCircle, FiZap, FiShield, FiUsers, FiTrendingUp, FiClock, FiAward } from 'react-icons/fi';
 import { useAuthStore } from '../../store/authStore';
 import authService from '../../services/authService';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -231,6 +232,11 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex relative overflow-hidden" 
       style={{ background: 'linear-gradient(180deg,#ffffff,#fbf8ff)' }}>
+      
+      {/* Theme Toggle - Fixed Top Right */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
       
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

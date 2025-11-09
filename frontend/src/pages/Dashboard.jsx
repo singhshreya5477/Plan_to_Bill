@@ -151,40 +151,26 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="relative overflow-hidden rounded-2xl p-6 shadow-xl animate-slide-up">
-        <div className="absolute inset-0 gradient-bg-primary opacity-90"></div>
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full blur-3xl"></div>
-        </div>
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Welcome back, {user?.name || user?.firstName || 'User'}! 👋
-            </h1>
-            <p className="text-white/80 text-sm">
-              Here's what's happening with your projects today
-            </p>
-          </div>
-          <div className="hidden md:block">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-              <span className="text-white/90 text-sm font-medium">All Systems Operational</span>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-6 relative">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-30 z-0">
+        <div className="absolute top-20 left-10 w-72 h-72 gradient-bg-purple rounded-full blur-3xl opacity-20 blob-animate"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 gradient-bg-blue rounded-full blur-3xl opacity-20 blob-animate" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 gradient-bg-pink rounded-full blur-3xl opacity-15 blob-animate" style={{ animationDelay: '4s' }}></div>
       </div>
 
       {/* Top Navigation Bar */}
-      <div className="flex items-center justify-between p-4 rounded-xl animate-slide-up hover-lift relative overflow-hidden shadow-lg" 
-        style={{ backgroundColor: 'rgb(var(--bg-secondary))' }}>
+      <div className="flex items-center justify-between p-4 rounded-xl animate-slide-up relative overflow-hidden shadow-xl border border-opacity-20 glass-effect hover-lift" 
+        style={{ 
+          backgroundColor: 'rgb(var(--bg-secondary))',
+          borderColor: 'rgb(var(--border-color))'
+        }}>
         
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none">
-          <div className="absolute inset-0 gradient-bg-primary"></div>
-        </div>
+        {/* Animated gradient border */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+        
+        {/* Spotlight effect */}
+        <div className="absolute inset-0 spotlight-effect opacity-0 hover:opacity-100"></div>
         
         <div className="relative z-10 flex items-center flex-1">
           {/* Navigation Menu */}
@@ -198,8 +184,8 @@ const Dashboard = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="animate-slide-up delay-100">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+        <div className="animate-slide-up delay-100 transform hover:scale-105 transition-all duration-300">
           <KPICard
             title="Active Projects"
             value={kpiData.activeProjects}
@@ -208,7 +194,7 @@ const Dashboard = () => {
             trend="+12%"
           />
         </div>
-        <div className="animate-slide-up delay-200">
+        <div className="animate-slide-up delay-200 transform hover:scale-105 transition-all duration-300">
           <KPICard
             title="Delayed Tasks"
             value={kpiData.delayedTasks}
@@ -217,7 +203,7 @@ const Dashboard = () => {
             trend="-5%"
           />
         </div>
-        <div className="animate-slide-up delay-300">
+        <div className="animate-slide-up delay-300 transform hover:scale-105 transition-all duration-300">
           <KPICard
             title="Hours Logged"
             value={kpiData.hoursLogged}
