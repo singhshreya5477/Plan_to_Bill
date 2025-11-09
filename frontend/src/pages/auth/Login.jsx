@@ -111,8 +111,14 @@ const Login = () => {
           localStorage.removeItem('rememberedEmail');
         }
 
+        // Format user data with name field
+        const userData = {
+          ...response.data.user,
+          name: `${response.data.user.first_name || ''} ${response.data.user.last_name || ''}`.trim()
+        };
+
         // Update auth store
-        login(response.data.user, response.data.token);
+        login(userData, response.data.token);
         
         // Navigate to dashboard
         navigate('/dashboard');

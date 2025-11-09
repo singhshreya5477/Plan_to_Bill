@@ -10,6 +10,10 @@ const projectRoutes = require('./src/routes/projectRoutes');
 const taskRoutes = require('./src/routes/taskRoutes');
 const timeTrackingRoutes = require('./src/routes/timeTrackingRoutes');
 const billingRoutes = require('./src/routes/billingRoutes');
+const salesOrderRoutes = require('./src/routes/salesOrderRoutes');
+const purchaseOrderRoutes = require('./src/routes/purchaseOrderRoutes');
+const vendorBillRoutes = require('./src/routes/vendorBillRoutes');
+const expenseRoutes = require('./src/routes/expenseRoutes');
 
 const app = express();
 
@@ -25,6 +29,10 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/time-tracking', timeTrackingRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/sales-orders', salesOrderRoutes);
+app.use('/api/purchase-orders', purchaseOrderRoutes);
+app.use('/api/vendor-bills', vendorBillRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

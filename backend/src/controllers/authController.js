@@ -181,7 +181,10 @@ exports.login = async (req, res) => {
           email: user.email,
           first_name: user.first_name,
           last_name: user.last_name,
-          role: user.role
+          phone: user.phone,
+          department: user.department,
+          role: user.role,
+          company_id: user.company_id
         }
       }
     });

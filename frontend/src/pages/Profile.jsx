@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
 import authService from '../services/authService';
 import { FiUser, FiMail, FiBriefcase, FiLock } from 'react-icons/fi';
@@ -10,13 +10,25 @@ const Profile = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: user?.name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim(),
     email: user?.email || '',
     role: user?.role || '',
-    hourlyRate: 1500,
-    phone: '',
-    department: ''
+    phone: user?.phone || '',
+    department: user?.department || ''
   });
+
+  // Update form when user changes (e.g., after profile update)
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        email: user.email || '',
+        role: user.role || '',
+        phone: user.phone || '',
+        department: user.department || ''
+      });
+    }
+  }, [user]);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -63,6 +75,8 @@ const Profile = () => {
         const updatedUser = response.data.user;
         updateUser({
           ...user,
+          first_name: updatedUser.first_name,
+          last_name: updatedUser.last_name,
           name: `${updatedUser.first_name} ${updatedUser.last_name}`.trim(),
           phone: updatedUser.phone,
           department: updatedUser.department

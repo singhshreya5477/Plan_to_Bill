@@ -1,56 +1,109 @@
-import { useState } from 'react';
-import { FiPlus, FiFilter, FiSearch, FiShoppingCart } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { FiPlus, FiSearch, FiShoppingCart, FiEye, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import financialService from '../../services/financialService';
+import CreateFinancialModal from '../../components/financial/CreateFinancialModal';
+import ViewFinancialModal from '../../components/financial/ViewFinancialModal';
 
 const PurchaseOrders = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [modalMode, setModalMode] = useState('create');
 
-  const mockPurchaseOrders = [
-    {
-      id: 'PO-001',
-      vendor: 'Cloud Hosting Services',
-      project: 'Brand Website Redesign',
-      amount: 12000,
-      status: 'confirmed',
-      date: '2025-10-20',
-      deliveryDate: '2025-10-25'
-    },
-    {
-      id: 'PO-002',
-      vendor: 'Photography Studio',
-      project: 'E-commerce Platform',
-      amount: 15000,
-      status: 'pending',
-      date: '2025-11-01',
-      deliveryDate: '2025-11-10'
-    },
-    {
-      id: 'PO-003',
-      vendor: 'Design Assets Provider',
-      project: 'Mobile App Development',
-      amount: 8000,
-      status: 'confirmed',
-      date: '2025-10-15',
-      deliveryDate: '2025-10-18'
+  useEffect(() => {
+    loadPurchaseOrders();
+  }, []);
+
+  const loadPurchaseOrders = async () => {
+    setLoading(true);
+    try {
+      const response = await financialService.getPurchaseOrders();
+      if (response.success) {
+        setPurchaseOrders(response.data.purchaseOrders || []);
+      }
+    } catch (error) {
+      console.error('Failed to load purchase orders:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  const statusColors = {
-    draft: 'badge-planned',
-    pending: 'badge-in-progress',
-    confirmed: 'badge-completed',
-    cancelled: 'badge-on-hold'
   };
+
+  const handleView = (order) => {
+    setSelectedOrder({ ...order, type: 'purchase_order' });
+    setShowViewModal(true);
+  };
+
+  const handleEdit = (order) => {
+    setSelectedOrder(order);
+    setModalMode('edit');
+    setShowCreateModal(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Are you sure you want to delete this purchase order?')) return;
+    
+    try {
+      await financialService.deletePurchaseOrder(id);
+      loadPurchaseOrders();
+    } catch (error) {
+      console.error('Failed to delete purchase order:', error);
+      alert('Failed to delete purchase order');
+    }
+  };
+
+  const handleCreateNew = () => {
+    setSelectedOrder(null);
+    setModalMode('create');
+    setShowCreateModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowCreateModal(false);
+    setShowViewModal(false);
+    setSelectedOrder(null);
+    setModalMode('create');
+    loadPurchaseOrders();
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      draft: 'bg-gray-100 text-gray-700',
+      sent: 'bg-blue-100 text-blue-700',
+      confirmed: 'bg-green-100 text-green-700',
+      received: 'bg-purple-100 text-purple-700',
+      cancelled: 'bg-red-100 text-red-700'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-700';
+  };
+
+  const getSummary = () => {
+    const total = purchaseOrders.length;
+    const totalValue = purchaseOrders.reduce((sum, order) => sum + parseFloat(order.total || 0), 0);
+    const confirmed = purchaseOrders.filter(o => o.status === 'confirmed').length;
+    const draft = purchaseOrders.filter(o => o.status === 'draft').length;
+    return { total, totalValue, confirmed, draft };
+  };
+
+  const summary = getSummary();
+
+  const filteredOrders = purchaseOrders.filter(order =>
+    order.order_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.vendor_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Purchase Orders</h1>
-          <p className="text-gray-600 mt-2">Manage vendor purchase orders for projects</p>
+          <h1 className="text-3xl font-bold" style={{ color: 'rgb(var(--text-primary))' }}>Purchase Orders</h1>
+          <p style={{ color: 'rgb(var(--text-secondary))' }} className="mt-2">Manage vendor purchase orders</p>
         </div>
-        <button className="btn-primary flex items-center">
-          <FiPlus className="mr-2" />
+        <button onClick={handleCreateNew} className="btn-primary flex items-center gap-2">
+          <FiPlus className="w-4 h-4" />
           Create Purchase Order
         </button>
       </div>
@@ -60,118 +113,154 @@ const PurchaseOrders = () => {
         <div className="card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total Orders</p>
-              <p className="text-3xl font-bold text-gray-900">3</p>
+              <p className="text-sm mb-1" style={{ color: 'rgb(var(--text-secondary))' }}>Total Orders</p>
+              <p className="text-3xl font-bold" style={{ color: 'rgb(var(--text-primary))' }}>{summary.total}</p>
             </div>
-            <FiShoppingCart className="h-8 w-8 text-purple-600" />
+            <FiShoppingCart className="h-8 w-8" style={{ color: 'rgb(var(--primary))' }} />
           </div>
         </div>
         <div className="card">
-          <p className="text-sm text-gray-600 mb-1">Total Value</p>
-          <p className="text-3xl font-bold text-gray-900">₹35K</p>
+          <p className="text-sm mb-1" style={{ color: 'rgb(var(--text-secondary))' }}>Total Value</p>
+          <p className="text-3xl font-bold" style={{ color: 'rgb(var(--text-primary))' }}>
+            ₹{summary.totalValue.toLocaleString()}
+          </p>
         </div>
         <div className="card">
-          <p className="text-sm text-gray-600 mb-1">Confirmed</p>
-          <p className="text-3xl font-bold text-green-600">2</p>
+          <p className="text-sm mb-1" style={{ color: 'rgb(var(--text-secondary))' }}>Confirmed</p>
+          <p className="text-3xl font-bold text-green-600">{summary.confirmed}</p>
         </div>
         <div className="card">
-          <p className="text-sm text-gray-600 mb-1">Pending</p>
-          <p className="text-3xl font-bold text-yellow-600">1</p>
+          <p className="text-sm mb-1" style={{ color: 'rgb(var(--text-secondary))' }}>Draft</p>
+          <p className="text-3xl font-bold text-yellow-600">{summary.draft}</p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
-          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by order number, vendor, or project..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-field pl-10"
-          />
-        </div>
-        <button className="btn-outline flex items-center">
-          <FiFilter className="mr-2" />
-          Filter
-        </button>
+      {/* Search */}
+      <div className="flex-1 relative">
+        <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'rgb(var(--text-secondary))' }} />
+        <input
+          type="text"
+          placeholder="Search by order number or vendor..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="input-field pl-10 w-full"
+        />
       </div>
 
-      {/* Purchase Orders List */}
-      <div className="card">
+      {/* Purchase Orders Table */}
+      <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
+          <table className="w-full">
+            <thead style={{ backgroundColor: 'rgb(var(--bg-secondary))' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order #
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Vendor
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Project
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Delivery Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>Order #</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>Vendor</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>Date</th>
+                <th className="text-right py-3 px-4 font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>Amount</th>
+                <th className="text-center py-3 px-4 font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>Status</th>
+                <th className="text-right py-3 px-4 font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {mockPurchaseOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-primary-600">{order.id}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{order.vendor}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-600">{order.project}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">{order.date}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">{order.deliveryDate}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-gray-900">
-                      ₹{(order.amount / 1000).toFixed(0)}K
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`badge ${statusColors[order.status]}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-primary-600 hover:text-primary-900 mr-3">
-                      View
-                    </button>
-                    <button className="text-gray-600 hover:text-gray-900">
-                      Edit
-                    </button>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-8" style={{ color: 'rgb(var(--text-secondary))' }}>
+                    Loading...
                   </td>
                 </tr>
-              ))}
+              ) : filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-8" style={{ color: 'rgb(var(--text-secondary))' }}>
+                    No purchase orders found. Click "Create Purchase Order" to add one.
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map(order => (
+                  <tr key={order.id} className="border-t" style={{ borderColor: 'rgb(var(--border))' }}>
+                    <td className="py-3 px-4">
+                      <span className="font-medium" style={{ color: 'rgb(var(--primary))' }}>
+                        {order.order_number}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-medium" style={{ color: 'rgb(var(--text-primary))' }}>
+                        {order.vendor_name}
+                      </div>
+                      {order.vendor_email && (
+                        <div className="text-sm" style={{ color: 'rgb(var(--text-secondary))' }}>
+                          {order.vendor_email}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-3 px-4" style={{ color: 'rgb(var(--text-secondary))' }}>
+                      {new Date(order.order_date).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4 text-right font-medium" style={{ color: 'rgb(var(--text-primary))' }}>
+                      ₹{parseFloat(order.total).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleView(order)}
+                          className="p-2 hover:bg-opacity-10 rounded"
+                          style={{ color: 'rgb(var(--primary))' }}
+                          title="View"
+                        >
+                          <FiEye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleEdit(order)}
+                          className="p-2 hover:bg-opacity-10 rounded"
+                          style={{ color: 'rgb(var(--primary))' }}
+                          title="Edit"
+                        >
+                          <FiEdit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(order.id)}
+                          className="p-2 hover:bg-opacity-10 rounded text-red-500"
+                          title="Delete"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Create/Edit Modal */}
+      {showCreateModal && (
+        <CreateFinancialModal
+          isOpen={showCreateModal}
+          onClose={handleModalClose}
+          type="purchase_order"
+          initialData={modalMode === 'edit' ? selectedOrder : null}
+          isEditing={modalMode === 'edit'}
+        />
+      )}
+
+      {/* View Modal */}
+      {showViewModal && selectedOrder && (
+        <ViewFinancialModal
+          isOpen={showViewModal}
+          onClose={handleModalClose}
+          item={selectedOrder}
+          onEdit={() => {
+            setShowViewModal(false);
+            handleEdit(selectedOrder);
+          }}
+        />
+      )}
     </div>
   );
 };

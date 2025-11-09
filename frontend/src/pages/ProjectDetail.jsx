@@ -11,19 +11,41 @@ import {
   FiCalendar,
   FiCheckCircle,
   FiClock,
-  FiAlertCircle
+  FiAlertCircle,
+  FiPlus,
+  FiX,
+  FiTrash2
 } from 'react-icons/fi';
 import projectService from '../services/projectService';
 import taskService from '../services/taskService';
+import { useAuthStore } from '../store/authStore';
+import api from '../services/api';
+import FinancialSettings from '../components/financial/FinancialSettings';
+import FinancialLinksBar from '../components/financial/FinancialLinksBar';
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('overview');
+  const [financialTab, setFinancialTab] = useState('sales-orders');
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Team member modal states
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState('');
+  const [selectedRole, setSelectedRole] = useState('member');
+  const [addingMember, setAddingMember] = useState(false);
+  const [memberError, setMemberError] = useState('');
+
+  const handleFinancialLinkClick = (mainTab, subTab) => {
+    setActiveTab(mainTab);
+    setFinancialTab(subTab);
+  };
 
   useEffect(() => {
     fetchProjectDetails();
@@ -37,7 +59,13 @@ const ProjectDetail = () => {
       console.log('Project details response:', response);
       
       if (response.success && response.data) {
-        setProject(response.data.project);
+        // Map team_members from response properly
+        const projectData = {
+          ...response.data.project,
+          team_members: response.data.team_members || [],
+          statistics: response.data.statistics
+        };
+        setProject(projectData);
       }
     } catch (err) {
       console.error('Fetch project details error:', err);
@@ -56,6 +84,85 @@ const ProjectDetail = () => {
     } catch (err) {
       console.error('Fetch project tasks error:', err);
     }
+  };
+
+  const fetchAvailableUsers = async () => {
+    try {
+      const response = await api.get('/admin/users');
+      if (response.success && response.data) {
+        // Filter out users already in the project
+        const currentMemberIds = project.team_members?.map(m => m.id) || [];
+        const available = response.data.users.filter(u => !currentMemberIds.includes(u.id));
+        setAvailableUsers(available);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    }
+  };
+
+  const handleAddMemberClick = () => {
+    setShowAddMemberModal(true);
+    setMemberError('');
+    setSelectedUser('');
+    setSelectedRole('member');
+    fetchAvailableUsers();
+  };
+
+  const handleAddMember = async () => {
+    if (!selectedUser) {
+      setMemberError('Please select a user');
+      return;
+    }
+
+    setAddingMember(true);
+    setMemberError('');
+
+    try {
+      const response = await projectService.addTeamMember(id, {
+        user_id: parseInt(selectedUser),
+        role: selectedRole
+      });
+
+      if (response.success) {
+        // Close modal first
+        setShowAddMemberModal(false);
+        
+        // Wait a bit then reload project to get updated team members
+        setTimeout(async () => {
+          await fetchProjectDetails();
+        }, 300);
+      } else {
+        setMemberError(response.message || 'Failed to add team member');
+      }
+    } catch (err) {
+      console.error('Add member error:', err);
+      setMemberError(err.response?.data?.message || 'Failed to add team member');
+    } finally {
+      setAddingMember(false);
+    }
+  };
+
+  const handleRemoveMember = async (memberId) => {
+    if (!confirm('Are you sure you want to remove this team member?')) return;
+
+    try {
+      const response = await api.delete(`/projects/${id}/members/${memberId}`);
+      if (response.success) {
+        fetchProjectDetails(); // Reload project
+      }
+    } catch (err) {
+      console.error('Remove member error:', err);
+      alert('Failed to remove team member');
+    }
+  };
+
+  const canManageTeam = () => {
+    // Admin can always manage
+    if (user?.role === 'admin') return true;
+    
+    // Check if user is project owner or manager
+    const currentMember = project?.team_members?.find(m => m.id === user?.id);
+    return currentMember && ['owner', 'manager'].includes(currentMember.role);
   };
 
   if (loading) {
@@ -167,6 +274,9 @@ const ProjectDetail = () => {
           </p>
         </div>
       </div>
+
+      {/* Financial Links Bar */}
+      <FinancialLinksBar projectId={id} onTabChange={handleFinancialLinkClick} />
 
       {/* Tabs */}
       <div className="border-b" style={{ borderColor: 'rgb(var(--border))' }}>
@@ -300,13 +410,25 @@ const ProjectDetail = () => {
 
         {activeTab === 'team' && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4" style={{ color: 'rgb(var(--text-primary))' }}>
-              Team Members
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold" style={{ color: 'rgb(var(--text-primary))' }}>
+                Team Members ({project.team_members?.length || 0})
+              </h3>
+              {canManageTeam() && (
+                <button 
+                  onClick={handleAddMemberClick}
+                  className="btn-primary text-sm flex items-center gap-2"
+                >
+                  <FiPlus className="w-4 h-4" />
+                  Add Team Member
+                </button>
+              )}
+            </div>
+
             {project.team_members && project.team_members.length > 0 ? (
               <div className="space-y-2">
                 {project.team_members.map((member, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: 'rgb(var(--border))' }}>
+                  <div key={member.id || index} className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: 'rgb(var(--border))' }}>
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" 
                         style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
@@ -319,12 +441,27 @@ const ProjectDetail = () => {
                         <p className="text-sm" style={{ color: 'rgb(var(--text-secondary))' }}>{member.email}</p>
                       </div>
                     </div>
-                    <span className="text-sm capitalize px-3 py-1 rounded" style={{ 
-                      backgroundColor: 'rgb(var(--bg-tertiary))',
-                      color: 'rgb(var(--text-secondary))'
-                    }}>
-                      {member.role || 'Member'}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm capitalize px-3 py-1 rounded" style={{ 
+                        backgroundColor: member.role === 'owner' || member.role === 'manager' 
+                          ? 'rgb(var(--primary) / 0.1)' 
+                          : 'rgb(var(--bg-tertiary))',
+                        color: member.role === 'owner' || member.role === 'manager'
+                          ? 'rgb(var(--primary))'
+                          : 'rgb(var(--text-secondary))'
+                      }}>
+                        {member.role || 'member'}
+                      </span>
+                      {canManageTeam() && member.role !== 'owner' && (
+                        <button
+                          onClick={() => handleRemoveMember(member.id)}
+                          className="p-2 hover:bg-red-50 rounded text-red-500"
+                          title="Remove member"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -337,14 +474,94 @@ const ProjectDetail = () => {
         {activeTab === 'settings' && (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold mb-4" style={{ color: 'rgb(var(--text-primary))' }}>
-              Project Settings
+              Financial Management
             </h3>
-            <p style={{ color: 'rgb(var(--text-secondary))' }}>
-              Project settings and configuration options coming soon.
-            </p>
+            <FinancialSettings projectId={id} initialTab={financialTab} />
           </div>
         )}
       </div>
+
+      {/* Add Team Member Modal */}
+      {showAddMemberModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md" style={{ backgroundColor: 'rgb(var(--bg-primary))' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold" style={{ color: 'rgb(var(--text-primary))' }}>
+                Add Team Member
+              </h3>
+              <button 
+                onClick={() => setShowAddMemberModal(false)}
+                className="p-2 hover:bg-opacity-10 rounded"
+                style={{ color: 'rgb(var(--text-secondary))' }}
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {memberError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
+                {memberError}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--text-primary))' }}>
+                  Select User *
+                </label>
+                <select
+                  value={selectedUser}
+                  onChange={(e) => setSelectedUser(e.target.value)}
+                  className="input-field w-full"
+                  disabled={addingMember}
+                >
+                  <option value="">-- Choose a user --</option>
+                  {availableUsers.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.first_name} {user.last_name} ({user.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--text-primary))' }}>
+                  Project Role *
+                </label>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="input-field w-full"
+                  disabled={addingMember}
+                >
+                  <option value="member">Member</option>
+                  <option value="manager">Manager (PM)</option>
+                </select>
+                <p className="text-xs mt-1" style={{ color: 'rgb(var(--text-secondary))' }}>
+                  Managers can add/remove team members
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4 border-t" style={{ borderColor: 'rgb(var(--border))' }}>
+                <button
+                  onClick={() => setShowAddMemberModal(false)}
+                  className="btn-secondary flex-1"
+                  disabled={addingMember}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddMember}
+                  className="btn-primary flex-1"
+                  disabled={addingMember || !selectedUser}
+                >
+                  {addingMember ? 'Adding...' : 'Add Member'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
